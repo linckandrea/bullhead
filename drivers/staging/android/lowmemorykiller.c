@@ -160,6 +160,15 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 		long cache_limit = minfree * (long)(PAGE_SIZE / 1024);
 		long free = other_free * (long)(PAGE_SIZE / 1024);
 		trace_lowmemory_kill(selected, cache_size, cache_limit, free);
+
+		task_lock(selected);
+		if (!selected->mm) {
+			/* Already exited, cannot do mark_tsk_oom_victim() */
+			task_unlock(selected);
+			goto out;
+		}
+		set_tsk_thread_flag(selected, TIF_MEMDIE);
+		task_unlock(selected);
 		lowmem_print(1, "Killing '%s' (%d), adj %hd,\n" \
 				"   to free %ldkB on behalf of '%s' (%d) because\n" \
 				"   cache %ldkB is below limit %ldkB for oom_score_adj %hd\n" \
@@ -173,10 +182,10 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 			     free);
 
 		lowmem_deathpending_timeout = jiffies + HZ;
-		set_tsk_thread_flag(selected, TIF_MEMDIE);
 		send_sig(SIGKILL, selected, 0);
 		rem -= selected_tasksize;
 	}
+out:
 	lowmem_print(4, "lowmem_shrink %lu, %x, return %d\n",
 		     sc->nr_to_scan, sc->gfp_mask, rem);
 	rcu_read_unlock();
