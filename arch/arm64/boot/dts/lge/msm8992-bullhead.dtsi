@@ -85,6 +85,7 @@
 		clock-names = "iface_clk", "core_clk";
 
 		qcom,use-pinctrl;
+		qcom,rt-priority;
 		qcom,infinite-mode = <0>;
 		qcom,ver-reg-exists;
 		qcom,master-id = <84>;
