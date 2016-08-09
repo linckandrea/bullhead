@@ -117,6 +117,8 @@ Optional properties:
   idle message when it is in idle state.
 - qcom,enable-thermal-mitigation = A bool to enable thermal mitigation when
   thermal run away occurs.
+- qcom,pm-qos-latency-us = The latency used to vote for QOS power manager. This
+value is typically max(latencies of every cluster at all power levels) + 1
 
 Example:
 
