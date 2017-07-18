@@ -479,7 +479,7 @@ static bool msm_mpm_interrupts_detectable(int d, bool from_idle)
 	else
 		irq_bitmap = unlisted->wakeup_irqs;
 
-	ret = (bool) __bitmap_empty(irq_bitmap, unlisted->size);
+	ret = (bool) bitmap_empty(irq_bitmap, unlisted->size);
 
 	return ret;
 }
