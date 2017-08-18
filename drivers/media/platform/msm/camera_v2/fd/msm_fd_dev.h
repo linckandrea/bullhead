@@ -246,6 +246,7 @@ struct msm_fd_device {
 	struct workqueue_struct *work_queue;
 	struct work_struct work;
 	struct completion hw_halt_completion;
+	bool init;
 };
 
 #endif /* __MSM_FD_DEV_H__ */
