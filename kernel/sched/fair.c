@@ -8077,7 +8077,6 @@ static int select_lowest_power_cpu(struct cpumask *cpus)
  */
 static void nohz_idle_balance(int this_cpu, enum cpu_idle_type idle)
 {
-	struct rq *this_rq = cpu_rq(this_cpu);
 	struct rq *rq;
 	int balance_cpu;
 	struct cpumask cpus_to_balance;

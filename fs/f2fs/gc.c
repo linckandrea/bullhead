@@ -156,7 +156,6 @@ next:
 int start_gc_thread(struct f2fs_sb_info *sbi)
 {
 	struct f2fs_gc_kthread *gc_th;
-	dev_t dev = sbi->sb->s_bdev->bd_dev;
 	int err = 0;
 
 	if (sbi->gc_thread != NULL)
