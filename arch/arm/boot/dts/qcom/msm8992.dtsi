@@ -3186,10 +3186,6 @@
 	parent-supply = <&pmi8994_s2_corner>;
 };
 
-&msm_vidc {
-	qcom,pm-qos-latency-us = <501>;
-};
-
 #include "msm8992-ion.dtsi"
 #include "msm-pm8994-rpm-regulator.dtsi"
 #include "msm-pm8994.dtsi"
