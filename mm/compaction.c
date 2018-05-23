@@ -1157,7 +1157,7 @@ static int state_notifier_callback(struct notifier_block *this,
 
 static struct notifier_block compact_notifier_block = {
 	.notifier_call = state_notifier_callback,
-	.priority = -1,
+	.priority = INT_MAX-3,
 };
 #endif
 
