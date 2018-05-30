@@ -2434,7 +2434,6 @@ static void update_min_max_capacity(void)
 	local_irq_save(flags);
 	for_each_possible_cpu(i)
 		raw_spin_lock(&cpu_rq(i)->lock);
-
 	__update_min_max_capacity();
 
 	for_each_possible_cpu(i)
@@ -7018,9 +7017,21 @@ void __cpuinit init_idle(struct task_struct *idle, int cpu)
 #endif
 }
 
+static const struct cpumask *get_adjusted_cpumask(const struct task_struct *p,
+	const struct cpumask *req_mask)
+{
+	/* Force all performance-critical kthreads onto the big cluster */
+	if (p->flags & PF_PERF_CRITICAL)
+		return cpu_perf_mask;
+
+	return req_mask;
+}
+
 #ifdef CONFIG_SMP
 void do_set_cpus_allowed(struct task_struct *p, const struct cpumask *new_mask)
 {
+	new_mask = get_adjusted_cpumask(p, new_mask);
+
 	lockdep_assert_held(&p->pi_lock);
 
 	if (p->sched_class && p->sched_class->set_cpus_allowed)
@@ -7060,6 +7071,8 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 	struct rq *rq;
 	unsigned int dest_cpu;
 	int ret = 0;
+
+	new_mask = get_adjusted_cpumask(p, new_mask);
 
 	rq = task_rq_lock(p, &flags);
 
