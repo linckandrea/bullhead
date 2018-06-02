@@ -889,6 +889,9 @@ static void cpufreq_init_policy(struct cpufreq_policy *policy)
 
 	/* set default policy */
 	ret = cpufreq_set_policy(policy, &new_policy);
+	policy->user_policy.policy = policy->policy;
+	policy->user_policy.governor = policy->governor;
+
 	if (ret) {
 		pr_debug("setting policy failed\n");
 		if (cpufreq_driver->exit)
@@ -1068,17 +1071,15 @@ static int __cpufreq_add_dev(struct device *dev, struct subsys_interface *sif,
 	read_unlock_irqrestore(&cpufreq_driver_lock, flags);
 #endif
 
-	/*
-	 * Restore the saved policy when doing light-weight init and fall back
-	 * to the full init if that fails.
-	 */
-	policy = frozen ? cpufreq_policy_restore(cpu) : NULL;
-	if (!policy) {
-		frozen = false;
+	if (frozen)
+		/* Restore the saved policy when doing light-weight init */
+		policy = cpufreq_policy_restore(cpu);
+	else
 		policy = cpufreq_policy_alloc();
-		if (!policy)
-			goto nomem_out;
-	}
+
+	if (!policy)
+		goto nomem_out;
+
 
 	/*
 	 * In the resume path, since we restore a saved policy, the assignment
@@ -1086,12 +1087,10 @@ static int __cpufreq_add_dev(struct device *dev, struct subsys_interface *sif,
 	 * the creation of a brand new one. So we need to perform this update
 	 * by invoking update_policy_cpu().
 	 */
-	if (frozen && cpu != policy->cpu) {
+	if (frozen && cpu != policy->cpu)
 		update_policy_cpu(policy, cpu);
-		WARN_ON(kobject_move(&policy->kobj, &dev->kobj));
-	} else {
+	else
 		policy->cpu = cpu;
-	}
 
 	policy->governor = CPUFREQ_DEFAULT_GOVERNOR;
 	cpumask_copy(policy->cpus, cpumask_of(cpu));
@@ -1125,13 +1124,8 @@ static int __cpufreq_add_dev(struct device *dev, struct subsys_interface *sif,
 	 */
 	cpumask_and(policy->cpus, policy->cpus, cpu_online_mask);
 
-	if (!frozen) {
-		policy->user_policy.min = policy->min;
-		policy->user_policy.max = policy->max;
-	} else {
-		policy->min = policy->user_policy.min;
-		policy->max = policy->user_policy.max;
-	}
+	policy->user_policy.min = policy->min;
+	policy->user_policy.max = policy->max;
 
 	blocking_notifier_call_chain(&cpufreq_policy_notifier_list,
 				     CPUFREQ_START, policy);
@@ -1169,11 +1163,6 @@ static int __cpufreq_add_dev(struct device *dev, struct subsys_interface *sif,
 
 	cpufreq_init_policy(policy);
 
-	if (!frozen) {
-		policy->user_policy.policy = policy->policy;
-		policy->user_policy.governor = policy->governor;
-	}
-
 	write_lock_irqsave(&cpufreq_driver_lock, flags);
 	for_each_cpu(j, policy->cpus)
 		per_cpu(cpufreq_cpu_data, j) = policy;
@@ -1196,11 +1185,8 @@ err_get_freq:
 	if (cpufreq_driver->exit)
 		cpufreq_driver->exit(policy);
 err_set_policy_cpu:
-	if (frozen) {
-		/* Do not leave stale fallback data behind. */
-		per_cpu(cpufreq_cpu_data_fallback, cpu) = NULL;
+	if (frozen)
 		cpufreq_policy_put_kobj(policy);
-	}
 	cpufreq_policy_free(policy);
 
 nomem_out:
@@ -2186,9 +2172,6 @@ static int cpufreq_cpu_callback(struct notifier_block *nfb,
 
 	dev = get_cpu_device(cpu);
 	if (dev) {
-
-		if (action & CPU_TASKS_FROZEN)
-			frozen = true;
 
 		switch (action & ~CPU_TASKS_FROZEN) {
 		case CPU_ONLINE:
