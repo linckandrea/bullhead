@@ -577,6 +577,9 @@ all: vmlinux
 # Disable maybe-uninitialized warnings
 KBUILD_CFLAGS  += $(call cc-disable-warning,maybe-uninitialized,)
 
+# Disable stringop-truncation warnings
+KBUILD_CFLAGS += $(call cc-disable-warning, stringop-truncation)
+
 # Disable packed-not-aligned warnings
 KBUILD_CFLAGS += $(call cc-disable-warning, packed-not-aligned)
 
