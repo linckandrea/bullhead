@@ -23,6 +23,7 @@
 
 #include <linux/wakelock.h>
 #include <linux/async.h>
+#include <linux/freezer.h>
 
 #define NFC_POWER_OFF       false
 #define NFC_POWER_ON        true
@@ -117,7 +118,7 @@ static ssize_t pn548_dev_read(struct file *filp, char __user *buf,
 	count = MAX_BUFFER_SIZE;
 
 	if (isFirstPacket == false) {
-		ret = wait_event_interruptible_timeout(pn548_dev->read_wq,
+		ret = wait_event_freezable_timeout(pn548_dev->read_wq,
 				gpio_get_value(pn548_dev->irq_gpio),
 				msecs_to_jiffies(NFC_TIMEOUT_MS));
 		if (ret == 0) {
