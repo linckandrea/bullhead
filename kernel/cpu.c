@@ -26,6 +26,8 @@
 
 #include <linux/interrupt.h>
 
+extern bool core_control_enabled;
+
 #ifdef CONFIG_SMP
 /* Serializes the updates to cpu_online_mask, cpu_present_mask */
 static DEFINE_MUTEX(cpu_add_remove_lock);
@@ -513,6 +515,11 @@ int disable_nonboot_cpus(void)
 	int cpu, first_cpu, error = 0;
 
 	cpu_maps_update_begin();
+	if (core_control_enabled)
+	{
+		core_control_enabled = 0;
+		pr_info("core_control disabled\n");
+	}
 	unaffine_perf_irqs();
 	first_cpu = cpumask_first(cpu_online_mask);
 	/*
@@ -588,6 +595,11 @@ void __ref enable_nonboot_cpus(void)
 
 	cpumask_clear(frozen_cpus);
 	reaffine_perf_irqs();
+	if (!core_control_enabled)
+	{
+		core_control_enabled = 1;
+		pr_info("core_control enabled\n");
+	}
 out:
 	cpu_maps_update_done();
 }
