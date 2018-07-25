@@ -2397,13 +2397,13 @@ static void __ref do_core_control(long temp)
 				continue;
 			if (cpus_offlined & BIT(i) && !cpu_online(i))
 				continue;
-			pr_info("Set Offline: CPU%d Temp: %ld\n",
+			pr_debug("Set Offline: CPU%d Temp: %ld\n",
 					i, temp);
 			if (cpu_online(i)) {
 				trace_thermal_pre_core_offline(i);
 				ret = cpu_down(i);
 				if (ret)
-					pr_err("Error %d offline core %d\n",
+					pr_debug("Error %d offline core %d\n",
 					       ret, i);
 				trace_thermal_post_core_offline(i,
 					cpumask_test_cpu(i, cpu_online_mask));
