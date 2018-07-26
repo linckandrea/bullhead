@@ -577,6 +577,9 @@ all: vmlinux
 # Disable maybe-uninitialized warnings
 KBUILD_CFLAGS  += $(call cc-disable-warning,maybe-uninitialized,)
 
+# Disable attribute-alias warnings
+KBUILD_CFLAGS  += $(call cc-disable-warning, attribute-alias)
+
 # Disable stringop-truncation warnings
 KBUILD_CFLAGS += $(call cc-disable-warning, stringop-truncation)
 
