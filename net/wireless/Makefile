@@ -17,6 +17,8 @@ cfg80211-$(CONFIG_CFG80211_INTERNAL_REGDB) += regdb.o
 
 CFLAGS_trace.o := -I$(src)
 
+CFLAGS_wext-core.o += $(call cc-disable-warning, nonnull)
+
 ccflags-y += -D__CHECK_ENDIAN__
 
 $(obj)/regdb.c: $(src)/db.txt $(src)/genregdb.awk
