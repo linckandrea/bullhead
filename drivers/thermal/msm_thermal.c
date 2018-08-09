@@ -2945,8 +2945,7 @@ static void check_temp(struct work_struct *work)
 	int ret = 0;
 
 	if (!msm_thermal_probed)
-		if (polling_enabled)
-			goto reschedule;
+		goto reschedule;
 
 	do_therm_reset();
 
