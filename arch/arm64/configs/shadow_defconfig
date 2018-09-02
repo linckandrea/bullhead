@@ -47,6 +47,8 @@ CONFIG_RCU_KTHREAD_PRIO=1
 # CONFIG_WANT_DEV_COREDUMP is not set
 # CONFIG_DEV_COREDUMP is not set
 # CONFIG_ALLOW_DEV_COREDUMP is not set
+# CONFIG_AUDITSYSCALL is not set
+# CONFIG_INTEGRITY is not set
 
 
 ##################
