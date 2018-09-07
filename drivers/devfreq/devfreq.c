@@ -1098,7 +1098,7 @@ static int state_notifier_callback(struct notifier_block *this,
 
 static struct notifier_block notif = {
 	.notifier_call = state_notifier_callback,
-	.priority = INT_MAX,
+	.priority = INT_MAX-2,
 };
 
 static int __init devfreq_init(void)
